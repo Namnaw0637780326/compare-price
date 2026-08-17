@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เปรียบเทียบราคาสินค้า</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  color: #222;
+}
+
+header {
+  background: #2563eb;
+  color: white;
+  text-align: center;
+  padding: 25px 15px;
+}
+
+header h1 {
+  margin: 0 0 8px;
+}
+
+.container {
+  max-width: 700px;
+  margin: 25px auto;
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.add {
+  background: #16a34a;
+  color: white;
+}
+
+.compare {
+  background: #2563eb;
+  color: white;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.store {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.result {
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+  background: #f8fafc;
+}
+
+.cheapest {
+  border: 2px solid #16a34a;
+  background: #ecfdf5;
+}
+
+.price {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.small {
+  color: #666;
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🛒 เปรียบเทียบราคาสินค้า</h1>
+  <p>ค้นหาราคาที่ถูกที่สุดจากหลายร้าน</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>📦 สินค้า</h2>
+
+    <input id="product" type="text" placeholder="ชื่อสินค้า เช่น คุชชั่น">
+
+    <div id="stores">
+
+      <div class="store">
+        <input class="storeName" type="text" placeholder="ชื่อร้าน เช่น Shopee">
+        <input class="storePrice" type="number" placeholder="ราคา (บาท)">
+      </div>
+
+      <div class="store">
+        <input class="storeName" type="text" placeholder="ชื่อร้าน เช่น Lazada">
+        <input class="storePrice" type="number" placeholder="ราคา (บาท)">
+      </div>
+
+    </div>
+
+    <button class="add" onclick="addStore()">+ เพิ่มร้าน</button>
+
+    <button class="compare" onclick="comparePrice()">
+      🔍 เปรียบเทียบราคา
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>🏆 ผลการเปรียบเทียบ</h2>
+    <div id="result">
+      <p class="small">กรอกข้อมูลแล้วกด “เปรียบเทียบราคา”</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+function addStore() {
+
+  const stores = document.getElementById("stores");
+
+  const div = document.createElement("div");
+
+  div.className = "store";
+
+  div.innerHTML = `
+    <input class="storeName" type="text" placeholder="ชื่อร้าน">
+    <input class="storePrice" type="number" placeholder="ราคา (บาท)">
+  `;
+
+  stores.appendChild(div);
+}
+
+
+function comparePrice() {
+
+  const product =
+    document.getElementById("product").value.trim();
+
+  const names =
+    document.querySelectorAll(".storeName");
+
+  const prices =
+    document.querySelectorAll(".storePrice");
+
+  let data = [];
+
+  for (let i = 0; i < names.length; i++) {
+
+    const name = names[i].value.trim();
+    const price = Number(prices[i].value);
+
+    if (name && price > 0) {
+      data.push({
+        name: name,
+        price: price
+      });
+    }
+  }
+
+  const result = document.getElementById("result");
+
+  if (!product) {
+    result.innerHTML =
+      "<p>⚠️ กรุณาใส่ชื่อสินค้าก่อน</p>";
+    return;
+  }
+
+  if (data.length < 2) {
+    result.innerHTML =
+      "<p>⚠️ กรุณาใส่ข้อมูลอย่างน้อย 2 ร้าน</p>";
+    return;
+  }
+
+  data.sort((a, b) => a.price - b.price);
+
+  let html = "";
+
+  data.forEach((item, index) => {
+
+    const cheapest = index === 0
+      ? "cheapest"
+      : "";
+
+    const medal = index === 0
+      ? "🏆 ถูกที่สุด"
+      : `${index + 1}.`;
+
+    html += `
+      <div class="result ${cheapest}">
+        <strong>${medal} ${item.name}</strong>
+        <div class="price">
+          ${item.price.toLocaleString()} บาท
+        </div>
+      </div>
+    `;
+  });
+
+  const saving = data[data.length - 1].price - data[0].price;
+
+  html += `
+    <div class="result">
+      💰 <strong>ประหยัดได้ ${saving.toLocaleString()} บาท</strong>
+      <br>
+      <span class="small">
+        สินค้า: ${product}
+      </span>
+    </div>
+  `;
+
+  result.innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>
